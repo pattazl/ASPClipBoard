@@ -1,6 +1,6 @@
 ## 功能介绍
 
-采用古老的js/vbs的ASP代码，用于临时使用，本人较为喜欢JS所以cb.asp为 jscript，但是有个上传组件使用的是vbs所以后端的cb目录用vbs
+采用古老的js/vbs的ASP代码，用于临时使用，本人较为喜欢JS所以index.asp为 jscript，但是有个上传组件使用的是vbs所以后端的cb目录用vbs
 
 1. 用于临时转存文件和文本
 2. 如下图
@@ -11,23 +11,27 @@
 
 ## 使用方法
 
-1. 需要windows的IIS服务和ASP功能
+1. 需要windows的IIS服务和ASP功能,由于需要上传,所以组件需要如下
 
-2. 需要手工创建临时文件目录，默认为相对目录
+   1.  Scripting.FileSystemObject (FSO)
+   2.  Scripting.Dictionary 
+   3. ADODB.Recordset
+   4. Adodb.Stream
+
+2. 支持相对目录,文件夹之间互不影响,可以建立文件夹,比如 tmp
 
    ```
-   cb/temp/
+   /tmp/
    ```
-如果要修改地址，请修改 cb.asp文件中的如下内容修改文件路径
+
+3. 配置IIS的访问入口默认为 index.asp
+4. 仓库的 src 目录中的代码复制过去即可使用
+5. 打开浏览器,通过 http://网址/目录/ 来实现访问
+6. 如果要修改地址和上传后缀控制，请修改 index.asp中的
 
   ```
- var filePath = 'cb/temp/'   // 临时文件路径
+// 临时文件路径 
+var filePath = './temp/'
+// 上传后缀控制
+var extList = "|txt|ini|md|mp3|m4a|bmp|jpg|jpeg|png|zip|7z|rar|pdf|doc|docx|xls|xlsx|ppt|pptx|epub|apk"
   ```
-和  cb/uploadResult.asp 文件中的
-  ```
-extList = "|ini|md|mp3|m4a|bmp|jpg|jpeg|png|zip|7z|rar|pdf|doc|docx|xls|xlsx|ppt|pptx|epub"
-filePath= "./temp/"
-  ```
-4. 上面代码的 extList 表示允许上传的文件后缀清单，用 |文件后缀组成字符串
-
-3. 访问入口文件为 cb.asp

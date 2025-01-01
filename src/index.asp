@@ -1,11 +1,34 @@
 <%@LANGUAGE="JSCRIPT" CODEPAGE="65001"%>
 <%
-// 处理 Application 的数据，返回有效的 arr 数据
-var filePath = 'cb/temp/'   // 临时文件路径
+// 临时文件路径 
+var filePath = './temp/'
+// 上传后缀控制
+var extList = "|txt|ini|md|mp3|m4a|bmp|jpg|jpeg|png|zip|7z|rar|pdf|doc|docx|xls|xlsx|ppt|pptx|epub|apk"
 
-var fileFlag = 'F_Kp8~@k::'
+var fileFlag = 'F_Kp8~@k::'  // 表明是文件
 var fileReg = /(.*)<(\d+)>$/
 
+var appName = getFolderName()+'/' // 唯一标记,也用于tick前缀
+
+setApp("extList",extList) // 设置允许的后缀
+setApp("filePath",filePath) // 设置路径
+
+// 读写自定义的App信息,避免冲突
+function getApp(item){
+    return Application( appName + item )
+}
+function setApp(item,val){
+    Application( appName + item ) = val
+}
+function getFolderName(){
+    var fso, currentPath, folderName
+    fso = Server.CreateObject("Scripting.FileSystemObject")
+    currentPath = Server.MapPath(".")
+    currentFolder = fso.GetFolder(currentPath)
+    folderName = currentFolder.Name
+    fso = null
+    return folderName
+}
 function strItem(item){
 	var str = String(item)
 	if( str =='undefined' )
@@ -31,6 +54,7 @@ function renderSize(filesize){
   size=size.toFixed(2);//保留的小数位数
   return size+unitArr[index];
 }
+// 处理 Application 的数据，返回有效的 arr 数据
 function doApplication(){
    var maxCount = 50
    var rowSplit = '|-6VoPMA-|'
@@ -40,7 +64,7 @@ function doApplication(){
    var arr = []
 
    // 读取原先数据，进行初步清理和赋值
-   var app = Application("tempText")
+   var app = getApp("tempText")
    if(  app!= null && app != ""){
       var arr1 = app.split(rowSplit)
       for(var i=0; i < arr1.length; i++)
@@ -67,11 +91,11 @@ function doApplication(){
    // 文件名
    var tick = strItem(Request.QueryString("tick"))
    var expireFile = strItem(Request.QueryString("expireFile"))
-   if( /^\d+$/.test(tick) && strItem(Application(tick)) !='' ){
+   if( /^\d+$/.test(tick) && strItem(getApp(tick)) !='' ){
    // 有文件
-	myText = fileFlag + Application(tick)
+	myText = fileFlag + getApp(tick)
 	e = expireFile
-	Application(tick) = ''
+	setApp(tick , '')
    }
    if(Request.Form.Count>0){
       myText = strItem(Request.Form("myText"))
@@ -113,7 +137,7 @@ function doApplication(){
 		}
 	  }
    }
-   Application("tempText") = tmpArr.join(rowSplit)
+   setApp("tempText", tmpArr.join(rowSplit))
    cleanFile(fileArr)
    return arr
 }
@@ -247,8 +271,9 @@ var arr = doApplication()
 	return true;
    }
 </script>
-   <form name="form3" method="post" action="cb/uploadResult.asp" enctype="multipart/form-data" onSubmit="return checkit2();">
+   <form name="form3" method="post" action="./uploadResult.asp" enctype="multipart/form-data" onSubmit="return checkit2();">
    <input type="hidden" id="expireFile" name="expireFile" value="0" />
+   <input type="hidden" id="appName" name="appName" value="<%=appName%>" />
    <input type="hidden" id="fileName" name="fileName" value="" />
     <div id="fileList">
       <div id="firstFile"><input class="uploadFile" name="f_" type="file" /><input type="button" onclick="addFile(this,1)" value="➕"> <input type="button" onclick="addFile(this,-1)" value="➖">

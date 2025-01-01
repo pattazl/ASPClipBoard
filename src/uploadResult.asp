@@ -9,10 +9,7 @@
 <body>
 <%
 ' 获取路径
-dim ufp,filePath,extList
-extList = "|ini|md|mp3|m4a|bmp|jpg|jpeg|png|zip|7z|rar|pdf|doc|docx|xls|xlsx|ppt|pptx|epub"
-filePath= "./temp/"
-
+dim ufp,filePath,extList,appName
 const rowSplit = "|"
 Function myFileName(fileName,count)
 	myFileName = URLDecode(Split(fileName,"|")(count))
@@ -121,6 +118,15 @@ ReDim fileArr(Upload.Files.Count-1)
 
 expireFile = Upload.Form("expireFile")
 fileName = Upload.Form("fileName")
+appName = Upload.Form("appName")
+extList = Application(appName&"extList")
+If IsEmpty(extList) Then
+    extList = "|mp3|m4a|bmp|jpg|jpeg|png|zip|7z|rar|pdf|doc|docx|xls|xlsx|ppt|pptx"
+end if
+filePath = Application(appName&"filePath")
+If IsEmpty(filePath) Then
+    filePath= "./temp/"
+end if
 
 count = 0
 tick = day(now)&hour(now)&minute(now)&second(now)
@@ -146,13 +152,13 @@ for each File in Upload.Files.Items
 	' Application("tempText")
 	' file.fileSize&",'"&path&ufp&"','"&session("username")&"','"&upfileext
 next
-Application(tick) = Join(fileArr,rowSplit)
+Application(appName&tick) = Join(fileArr,rowSplit)
 Set upload=nothing
 Response.Write("已经成功上传")
 
 if ufp<>"" then %>
 <script language="JavaScript">
-window.location.href="../cb.asp?tick=<%=tick%>&expireFile=<%=expireFile%>"
+window.location.href="./?tick=<%=tick%>&expireFile=<%=expireFile%>"
 </script>
 <%
 end if
